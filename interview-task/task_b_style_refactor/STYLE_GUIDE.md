@@ -82,7 +82,7 @@ file:
 ```
 
 This still applies even when the aligned expression is a long `CASE`/window
-function — the `AS` column just moves further right for that block.
+function — the `AS` column just moves further right for that block. 
 
 ## CTEs
 
