@@ -7,12 +7,24 @@ validation, and the commands and checks used for all three tasks.
 
 The unit test in
 [`task_a_dbt_bug/models/intermediate/_intermediate__models.yml`](task_a_dbt_bug/models/intermediate/_intermediate__models.yml)
-is enabled. The model
+is enabled. The original model partitioned `ROW_NUMBER()` by both
+`customer_id` and `campaign_name`, so ranking restarted for every campaign,
+and it did not filter to `rown = 1`. As a result, it could return multiple
+touches per customer instead of one latest touch. The fix is to partition
+only by `customer_id` and keep only `rown = 1`.
+
+The unit-test input and expected fixtures are CSV files, so both fixture
+configurations specify `format: csv`. Without that format, dbt treated the
+fixture rows as dictionaries and failed to parse the CSV input.
+
+The model
 [`task_a_dbt_bug/models/intermediate/int_customer_latest_campaign.sql`](task_a_dbt_bug/models/intermediate/int_customer_latest_campaign.sql)
 uses `ROW_NUMBER()` partitioned by `customer_id`, orders each customer's
 campaign dates descending, and keeps row 1. This produces the most recent
-campaign for each customer. Ranking dates in the wrong direction would select
-an older touch; the fixture-based unit test checks that the newest date wins.
+campaign for each customer. The fixture-based unit test checks that the newest
+date wins. Even without the unit test, the existing `unique` data test on
+`customer_id` would fail when multiple touches for one customer reached the
+model, so `dbt build` in CI would block the change before production.
 
 ### Validation and issue encountered
 
@@ -49,7 +61,8 @@ was reformatted to follow the house guide:
 - CTEs now describe their contents: `customer_orders`,
   `order_line_details`, `order_totals`, `latest_order_per_customer`,
   `customer_lifetime_totals`, and `customer_order_summary`.
-- The final statement is `SELECT * FROM customer_order_summary`.
+- The final statement selects from `customer_order_summary` and applies
+  `ORDER BY customer_id` in the outer query, where ordering is guaranteed.
 - The query's calculations, output columns, and grain were preserved.
 - The guide's original trailing space was restored; its rules and wording
   were not changed.
@@ -65,8 +78,9 @@ against the same DuckDB fixture; their output rows matched.
 This task requested a style-only refactor, so these potential data-quality
 issues are reported rather than silently changed:
 
-- Duplicate `product_id` or `customer_id` keys in the joined dimensions can
-  multiply order-line rows and inflate revenue totals.
+- Duplicate `product_id` keys in `stg_products` or duplicate `customer_id`
+  keys in `stg_customers` can multiply joined rows, double-counting
+  `order_value` and `lifetime_spend`.
 - `order_status NOT IN (...)` excludes rows whose `order_status` is `NULL`.
 - If a customer has multiple orders with the same `order_date`, the
   `ROW_NUMBER()` ordering has no tie-breaker, so the selected latest order

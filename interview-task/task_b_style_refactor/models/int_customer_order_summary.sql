@@ -61,7 +61,7 @@ WITH customer_orders AS (SELECT orders.customer_id
                              LEFT JOIN customer_orders
                                     ON latest_order_per_customer.customer_id = customer_orders.customer_id
                               GROUP BY ALL
-                              ORDER BY latest_order_per_customer.customer_id
                               )
-SELECT *
-  FROM customer_order_summary
+   SELECT *
+     FROM customer_order_summary
+ ORDER BY customer_id
