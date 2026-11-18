@@ -1,0 +1,7 @@
+interview_task_a:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: 'interview_task_a.duckdb'
+      threads: 4

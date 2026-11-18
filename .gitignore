@@ -1,0 +1,13 @@
+.venv/
+.vscode/
+
+# dbt
+**/target/
+**/logs/
+**/*.duckdb
+**/.user.yml
+
+# Python and Airflow
+**/__pycache__/
+**/*.py[cod]
+**/tickets.db

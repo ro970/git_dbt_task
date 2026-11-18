@@ -1,0 +1,9 @@
+attendance_id,customer_id,campaign_name,campaign_date
+1,1,Spring Webinar,2024-03-01
+2,1,Product Demo,2024-05-14
+3,1,Autumn Newsletter Click,2024-09-20
+4,2,Spring Webinar,2024-03-01
+5,3,Product Demo,2024-05-14
+6,3,Autumn Newsletter Click,2024-09-20
+7,3,Year End Roundup,2024-12-02
+8,4,Spring Webinar,2024-03-01

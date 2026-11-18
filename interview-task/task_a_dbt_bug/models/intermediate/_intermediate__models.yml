@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: int_customer_latest_campaign
+    description: >
+      One row per customer: the most recent marketing campaign they attended,
+      by campaign_date. Feeds "who did we last talk to" reporting.
+    columns:
+      - name: customer_id
+        data_tests:
+          - unique
+          - not_null
+
+unit_tests:
+  - name: test_latest_campaign_picks_most_recent_date_per_customer
+    description: >
+      A customer with several campaign touches should produce exactly one
+      output row, holding the most recent campaign_date.
+    model: int_customer_latest_campaign
+    given:
+      - input: ref('stg_campaign_attendance')
+        fixture: test_latest_campaign_picks_most_recent_date_per_customer_input
+        format: csv
+    expect:
+      fixture: test_latest_campaign_picks_most_recent_date_per_customer_expected
+      format: csv
